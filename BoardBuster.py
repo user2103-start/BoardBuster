@@ -1,21 +1,20 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import base64
 
 # Page Config
 st.set_page_config(page_title="Board Stress Buster", page_icon="🔱", layout="centered")
 
-# Custom Styling
+# Custom Styling (FIXED: unsafe_allow_html=True)
 st.markdown("""
     <style>
     .main { background-color: #0e1117; }
     h1 { color: #00ffcc; text-align: center; font-family: 'Courier New', Courier, monospace; }
     .stAudio { margin-top: 20px; border-radius: 50px; }
     </style>
-    """, unsafe_allow_status=True)
+    """, unsafe_allow_html=True)
 
 st.title("🔱 Board Exam Stress Buster")
-st.write("<p style='text-align: center; color: #aaa;'> इयरफ़ोन लगा लो, आँखें बंद करो और बस महसूस करो...</p>", unsafe_allow_status=True)
+st.write("<p style='text-align: center; color: #aaa;'> इयरफ़ोन लगा लो, आँखें बंद करो और बस महसूस करो...</p>", unsafe_allow_html=True)
 
 # --- 1. HEXAGON ANIMATION ---
 hex_code = """
@@ -61,15 +60,14 @@ hex_code = """
 components.html(hex_code, height=350)
 
 # --- 2. AUDIO SECTION ---
-# Shobhit Nirwan's Audio
-audio_file_path = "2_5213430714921421985_20260210_163912.mp3" # File name same rakhna
+audio_file_path = "2_5213430714921421985_20260210_163912.mp3"
 
 try:
     with open(audio_file_path, "rb") as f:
         audio_bytes = f.read()
     st.audio(audio_bytes, format="audio/mp3")
-except FileNotFoundError:
-    st.error("Audio file nahi mili! Please check karein ki file name sahi hai.")
+except Exception as e:
+    st.error("Audio file play nahi ho rahi. Check karein ki file GitHub par uploaded hai.")
 
 # --- 3. MOTIVATIONAL QUOTES ---
 st.divider()
