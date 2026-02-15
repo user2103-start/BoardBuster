@@ -1,83 +1,90 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Page Config
-st.set_page_config(page_title="Board Stress Buster", page_icon="🔱", layout="centered")
+# 1. Page Config (Mobile friendly & Full Width)
+st.set_page_config(page_title="Board Stress Buster", page_icon="🔱", layout="wide")
 
-# Custom Styling (FIXED: unsafe_allow_html=True)
+# 2. CSS for Full Screen & Dark UI
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; }
-    h1 { color: #00ffcc; text-align: center; font-family: 'Courier New', Courier, monospace; }
-    .stAudio { margin-top: 20px; border-radius: 50px; }
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .stApp { background-color: #000000; }
+    .audio-container {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+    }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🔱 Board Exam Stress Buster")
-st.write("<p style='text-align: center; color: #aaa;'> इयरफ़ोन लगा लो, आँखें बंद करो और बस महसूस करो...</p>", unsafe_allow_html=True)
-
-# --- 1. HEXAGON ANIMATION ---
-hex_code = """
-<canvas id="canvas"></canvas>
-<style>
-    body { margin: 0; overflow: hidden; background: #0e1117; }
-    canvas { display: block; width: 100vw; height: 350px; }
-</style>
+# 3. HIGH-END VISUALS (Full Screen Starfield/Tunnel)
+visuals_code = """
+<canvas id="canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1;"></canvas>
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = 350;
+    let w, h, stars = [];
 
-    let tick = 0;
-    function drawHex(x, y, size, color) {
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-            ctx.lineTo(x + size * Math.cos(i * Math.PI / 3), y + size * Math.sin(i * Math.PI / 3));
+    function init() {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+        stars = [];
+        for(let i=0; i<400; i++) {
+            stars.push({
+                x: Math.random() * w - w/2,
+                y: Math.random() * h - h/2,
+                z: Math.random() * w,
+                o: Math.random()
+            });
         }
-        ctx.closePath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.stroke();
     }
 
-    function animate() {
-        ctx.fillStyle = 'rgba(14, 17, 23, 0.15)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        for (let x = 0; x < canvas.width + 60; x += 60) {
-            for (let y = 0; y < canvas.height + 60; y += 60) {
-                let size = 15 + Math.sin(tick * 0.03 + (x + y) * 0.01) * 12;
-                let hue = (tick * 0.5 + x * 0.1) % 360;
-                drawHex(x, y, size, `hsla(${hue}, 80%, 60%, 0.5)`);
-            }
-        }
-        tick++;
-        requestAnimationFrame(animate);
+    function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.save();
+        ctx.translate(w/2, h/2);
+        
+        stars.forEach(s => {
+            s.z -= 4; // Speed
+            if(s.z <= 0) s.z = w;
+            
+            let x = s.x * (w/s.z);
+            let y = s.y * (w/s.z);
+            let size = (1 - s.z/w) * 5;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI*2);
+            ctx.fillStyle = `hsla(${s.z % 360}, 70%, 70%, ${1 - s.z/w})`;
+            ctx.fill();
+        });
+        ctx.restore();
+        requestAnimationFrame(draw);
     }
-    animate();
+
+    window.addEventListener('resize', init);
+    init();
+    draw();
 </script>
 """
-components.html(hex_code, height=350)
+components.html(visuals_code, height=0) # Hidden trigger for JS
 
-# --- 2. AUDIO SECTION ---
+# 4. AUDIO OVERLAY
 audio_file_path = "2_5213430714921421985_20260210_163912.mp3"
-
+st.markdown('<div class="audio-container">', unsafe_allow_html=True)
 try:
     with open(audio_file_path, "rb") as f:
-        audio_bytes = f.read()
-    st.audio(audio_bytes, format="audio/mp3")
-except Exception as e:
-    st.error("Audio file play nahi ho rahi. Check karein ki file GitHub par uploaded hai.")
-
-# --- 3. MOTIVATIONAL QUOTES ---
-st.divider()
-st.markdown("""
-> "कम पढ़कर भी जो बच्चा फोड़ के आए, उसे लेजेंड कहते हैं और तू एक लेजेंड है!"
-
-**Important Reminders:**
-* **120% Effort:** इस पेपर में अपना बेस्ट देकर आना है।
-* **Never Give Up:** जब तक टीचर पेपर न छीन ले, तब तक लिखते रहना है।
-* **The Why:** अच्छे मार्क्स इसलिए चाहिए ताकि कल कोई तुम्हें दबा न सके।
-""")
-
-st.success("Best of luck! Ja, Phod Ke Aa! 🚀")
+        st.audio(f.read(), format="audio/mp3")
+except:
+    st.error("Audio Load Nahi Hui!")
+st.markdown('</div>', unsafe_allow_html=True)
