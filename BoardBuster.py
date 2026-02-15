@@ -1,86 +1,80 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Page config
 st.set_page_config(page_title="Board Stress Buster", page_icon="🔱", layout="wide")
 
-# CSS to make everything black and fit perfectly
+# CSS for a clean, immersive look
 st.markdown("""
     <style>
     .stApp { background-color: #000000; }
-    [data-testid="stHeader"] { display: none; }
-    #MainMenu { visibility: hidden; }
-    footer { visibility: hidden; }
+    [data-testid="stHeader"], footer, #MainMenu { display: none; }
     .audio-wrapper {
         position: fixed;
-        top: 20px;
+        bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 999;
-        width: 90%;
-        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: 30px;
+        backdrop-filter: blur(8px);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Audio Player at the Top
+# Audio at the bottom for better reach
 audio_file_path = "2_5213430714921421985_20260210_163912.mp3"
 st.markdown('<div class="audio-wrapper">', unsafe_allow_html=True)
 try:
     with open(audio_file_path, "rb") as f:
         st.audio(f.read(), format="audio/mp3")
 except:
-    st.error("Audio file missing on GitHub!")
+    st.error("Audio file missing!")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- HYPNOTIC FULL SCREEN VISUALS ---
+# --- ADVANCED SPIROGRAPH / FLUID VISUALS ---
 hypnotic_js = """
-<canvas id="c" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black;"></canvas>
+<canvas id="canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;"></canvas>
 <script>
-    var c = document.getElementById("c");
-    var ctx = c.getContext("2d");
-    var w, h;
-    var stars = [];
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [];
 
     function init() {
         w = window.innerWidth;
         h = window.innerHeight;
-        c.width = w;
-        c.height = h;
-        stars = [];
-        for (var i = 0; i < 300; i++) {
-            stars.push({
-                x: Math.random() * w,
-                y: Math.random() * h,
-                r: Math.random() * 2 + 1,
-                vx: Math.random() * 2 - 1,
-                vy: Math.random() * 2 - 1,
-                hue: Math.random() * 360
-            });
-        }
+        canvas.width = w;
+        canvas.height = h;
     }
 
+    let hue = 0;
     function draw() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Trail effect
         ctx.fillRect(0, 0, w, h);
-        for (var i = 0; i < stars.length; i++) {
-            var s = stars[i];
+        
+        let time = Date.now() * 0.001;
+        ctx.translate(w/2, h/2);
+        
+        for (let i = 0; i < 100; i++) {
+            let angle = i * 0.2 + time;
+            let radius = Math.sin(i * 0.02 + time) * (w * 0.35);
+            let x = Math.cos(angle) * radius;
+            let y = Math.sin(angle) * radius;
+            
             ctx.beginPath();
-            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            ctx.fillStyle = "hsla(" + s.hue + ", 100%, 70%, 0.8)";
+            ctx.arc(x, y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${hue + i}, 80%, 60%, 0.8)`;
             ctx.fill();
-            s.x += s.vx;
-            s.y += s.vy;
-            s.hue += 0.5;
-            if (s.x < 0 || s.x > w) s.vx *= -1;
-            if (s.y < 0 || s.y > h) s.vy *= -1;
         }
+        
+        ctx.translate(-w/2, -h/2);
+        hue += 0.5;
         requestAnimationFrame(draw);
     }
-    window.addEventListener("resize", init);
+
+    window.addEventListener('resize', init);
     init();
     draw();
 </script>
 """
-# Height 1000 taaki scroll ka jhanjhat hi na ho
-components.html(hypnotic_js, height=1000)
+components.html(hypnotic_js, height=2000)
